@@ -1,14 +1,12 @@
-package vjezba_xo;
-
-import java.util.Random;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class TicTacToe <T extends Player, E extends Player>{
     private T playerOne;
     private E playerTwo;
-    private String[][] board = new String[3][3];
-
+    protected static String[][] board = new String[3][3];
 
     TicTacToe(T pOne, E pTwo) {
         playerOne = pOne;
@@ -23,7 +21,6 @@ public class TicTacToe <T extends Player, E extends Player>{
 
     public void play() {
         Scanner scanner = new Scanner(System.in);
-        Random random = new Random();
         while(true) {
             printBoard();
 
@@ -33,14 +30,14 @@ public class TicTacToe <T extends Player, E extends Player>{
             do {
                 pOne = playerOne.makeMove();
             } while(!validMove(pOne));
+            board[pOne[0]][pOne[1]] = playerOne.getSymbol();
 
-            computerThinking(playerOne);
-            board[pOne[0]][pOne[1]] = "X";
             if (isGameOver()) {
                 printWinner(playerOne);
                 break;
             }
             printBoard();
+
             if (isTie()) {
                 System.out.println("\nIt's a TIE!");
                 break;
@@ -49,9 +46,8 @@ public class TicTacToe <T extends Player, E extends Player>{
             do {
                 pTwo = playerTwo.makeMove();
             } while(!validMove(pTwo));
+            board[pTwo[0]][pTwo[1]] = playerTwo.getSymbol();
 
-            computerThinking(playerTwo);
-            board[pTwo[0]][pTwo[1]] = "O";
             if (isGameOver()) {
                 printWinner(playerTwo);
                 break;
@@ -70,17 +66,6 @@ public class TicTacToe <T extends Player, E extends Player>{
         }
     }
 
-    public void computerThinking(Player player) {
-        Random random = new Random();
-        if (player instanceof ComputerPlayer) {
-            System.out.println("\n" + player.getName() + " is thinking...");
-            try {
-                Thread.sleep(random.nextInt(3) * 1000 + 2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     public boolean isTie() {
         for (int i=0; i < 3; i++) {
@@ -135,7 +120,7 @@ public class TicTacToe <T extends Player, E extends Player>{
     }
 
     public void printBoard() {
-        System.out.println("\n\n    1   2   3 ");
+        System.out.println("\n\n    A   B   C ");
         System.out.println("              ");
         for (int i=0; i < 3; i++) {
             System.out.print(i+1 + "  ");
@@ -154,27 +139,54 @@ public class TicTacToe <T extends Player, E extends Player>{
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        int gameMode;
+        Pattern pattern = Pattern.compile("[1-3]");
+        String gameMode;
 
         System.out.println("----GAME MENU----");
         System.out.println("Choose game mode: \n1) Player vs Player \n2) Player vs Computer \n3) Computer vs Computer");
         System.out.print("GAME MODE: ");
-        gameMode = Integer.parseInt(scanner.nextLine());
+        gameMode = scanner.nextLine();
+        Matcher matcher = pattern.matcher(gameMode);
 
-        Player player1 = null;
-        Player player2 = null;
+        while (!matcher.find()) {
+            System.out.print("\nChoose valid number: ");
+            gameMode = scanner.nextLine();
+            matcher = pattern.matcher(gameMode);
+        }
 
-        if (gameMode == 1) {
+
+        String computerLevel = "1";
+        if (gameMode.equals("2") || gameMode.equals("3")) {
+            pattern = Pattern.compile("[1-2]");
+            System.out.println("\nChoose computer level: \n1)Beginner \n2)Expert");
+            computerLevel = scanner.nextLine();
+            matcher = pattern.matcher(computerLevel);
+            while (!matcher.find()) {
+                System.out.print("\nChoose valid number: ");
+                gameMode = scanner.nextLine();
+                matcher = pattern.matcher(gameMode);
+            }
+        }
+
+        Player player1;
+        Player player2;
+
+        if (gameMode.equals("1")) {
             player1 = new HumanPlayer("X", "Human1");
-            player2 = new ComputerPlayer("O", "Human2");
+            player2 = new HumanPlayer("O", "Human2");
         }
-        else if (gameMode == 2) {
+        else if (gameMode.equals("2")) {
             player1 = new HumanPlayer("X", "Human");
-            player2 = new ComputerPlayer("O", "Computer2");
+            if (computerLevel.equals("1")) {
+                player2 = new ComputerPlayer("O", "Computer2");
+            } else {
+                player2 = new ComputerExpertPlayer("O", "Computer2");
+            }
         }
-        else if (gameMode == 3) {
+        else {
             player1 = new ComputerPlayer("X", "Computer1");
             player2 = new ComputerPlayer("O", "Computer2");
+
         }
 
         TicTacToe<Player, Player> ticTacToe = new TicTacToe<>(player1, player2);

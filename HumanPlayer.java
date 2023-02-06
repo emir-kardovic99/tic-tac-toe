@@ -1,5 +1,3 @@
-package vjezba_xo;
-
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,33 +19,40 @@ public class HumanPlayer implements Player{
     @Override
     public int[] makeMove() {
         Scanner scanner = new Scanner(System.in);
+        Pattern pattern = Pattern.compile("[1-3][a-cA-C]");
         String userInput;
 
-        System.out.print("\n" + getName() + " u koje polje zelite da upisete " + getSymbol() + " (unesite koordinate npr. 1 2): ");
+        System.out.print("\n" + getName() + " choose field u want to put " + getSymbol() +" (for example: 2B): ");
+
         userInput = scanner.nextLine();
+        Matcher matcher = pattern.matcher(userInput);
+        while (!matcher.find()) {
+            System.out.print("\nPlease input a valid field: ");
+            userInput = scanner.nextLine();
+            matcher = pattern.matcher(userInput);
+        }
+        userInput = userInput.toUpperCase();
 
         int[][] retVal = {
                 {0, 0}, {0, 1}, {0, 2},
                 {1, 0}, {1, 1}, {1, 2},
                 {2, 0}, {2, 1}, {2, 2}};
         switch (userInput) {
-            case "1 1":
-                return retVal[0];
-            case "1 2":
+            case "1B":
                 return retVal[1];
-            case "1 3":
+            case "1C":
                 return retVal[2];
-            case "2 1":
+            case "2A":
                 return retVal[3];
-            case "2 2":
+            case "2B":
                 return retVal[4];
-            case "2 3":
+            case "2C":
                 return retVal[5];
-            case "3 1":
+            case "3A":
                 return retVal[6];
-            case "3 2":
+            case "3B":
                 return retVal[7];
-            case "3 3":
+            case "3C":
                 return retVal[8];
             default:
                 return retVal[0];
