@@ -1,10 +1,12 @@
+package vjezba_xo;
+
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HumanPlayer implements Player{
-    private String symbol;
-    private String name;
+    private final String symbol;
+    private final String name;
 
     HumanPlayer(String symbol, String name) {
         this.symbol = symbol;
@@ -17,7 +19,7 @@ public class HumanPlayer implements Player{
     }
 
     @Override
-    public int[] makeMove() {
+    public int[] makeMove(Player player1, Player player2, String[][] board) {
         Scanner scanner = new Scanner(System.in);
         Pattern pattern = Pattern.compile("[1-3][a-cA-C]");
         String userInput;
@@ -31,12 +33,13 @@ public class HumanPlayer implements Player{
             userInput = scanner.nextLine();
             matcher = pattern.matcher(userInput);
         }
-        userInput = userInput.toUpperCase();
+        userInput = userInput.substring(matcher.start(), matcher.end()).toUpperCase();
 
         int[][] retVal = {
                 {0, 0}, {0, 1}, {0, 2},
                 {1, 0}, {1, 1}, {1, 2},
                 {2, 0}, {2, 1}, {2, 2}};
+
         switch (userInput) {
             case "1B":
                 return retVal[1];

@@ -1,8 +1,10 @@
+package vjezba_xo;
+
 import java.util.Random;
 
 public class ComputerPlayer implements Player{
-    private String symbol;
-    private String name;
+    private final String symbol;
+    private final String name;
 
     ComputerPlayer(String symbol, String name) {
         this.symbol = symbol;
@@ -15,17 +17,23 @@ public class ComputerPlayer implements Player{
     }
 
     @Override
-    public int[] makeMove() {
+    public int[] makeMove(Player player1, Player player2, String[][] board) {
         Random random = new Random();
-
-        int move = random.nextInt(9);
-        computerThinking();
-
         int[][] retVal = {
                 {0, 0}, {0, 1}, {0, 2},
                 {1, 0}, {1, 1}, {1, 2},
                 {2, 0}, {2, 1}, {2, 2}};
-        return retVal[move];
+        int[] move;
+        int rand;
+
+        do {
+            rand = random.nextInt(9);
+            move = retVal[rand];
+
+        } while (!board[move[0]][move[1]].equals(" "));
+
+        computerThinking();
+        return move;
     }
 
     public void computerThinking() {
