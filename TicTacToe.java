@@ -1,68 +1,33 @@
 package vjezba_xo;
 
-import java.util.Random;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
-public class TicTacToe <T extends Player, E extends Player>{
-    private T playerOne;
-    private E playerTwo;
-    private String[][] board = new String[3][3];
+public class TicTacToe {
+    private final Player playerOne;
+    private final Player playerTwo;
+    private final Board board;
 
-
-    TicTacToe(T pOne, E pTwo) {
+    TicTacToe(Player pOne, Player pTwo) {
         playerOne = pOne;
         playerTwo = pTwo;
-
-        for (int i=0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                board[i][j] = " ";
-            }
-        }
+        board = new Board();
     }
 
     public void play() {
         Scanner scanner = new Scanner(System.in);
-        Random random = new Random();
+
         while(true) {
-            printBoard();
-
-            int[] pOne;
-            int[] pTwo;
-
-            do {
-                pOne = playerOne.makeMove();
-            } while(!validMove(pOne));
-
-            computerThinking(playerOne);
-            board[pOne[0]][pOne[1]] = "X";
-            if (isGameOver()) {
-                printWinner(playerOne);
-                break;
-            }
-            printBoard();
-            if (isTie()) {
-                System.out.println("\nIt's a TIE!");
+            if (playerMoveCheckWinner(playerOne)) {
                 break;
             }
 
-            do {
-                pTwo = playerTwo.makeMove();
-            } while(!validMove(pTwo));
-
-            computerThinking(playerTwo);
-            board[pTwo[0]][pTwo[1]] = "O";
-            if (isGameOver()) {
-                printWinner(playerTwo);
-                break;
-            }
-
-            if (isTie()) {
-                System.out.println("It's a TIE!");
+            if (playerMoveCheckWinner(playerTwo)) {
                 break;
             }
         }
-
 
         System.out.println("Do you want to play one more? (y/n): ");
         if (scanner.next().equalsIgnoreCase("y")) {
@@ -70,22 +35,30 @@ public class TicTacToe <T extends Player, E extends Player>{
         }
     }
 
-    public void computerThinking(Player player) {
-        Random random = new Random();
-        if (player instanceof ComputerPlayer) {
-            System.out.println("\n" + player.getName() + " is thinking...");
-            try {
-                Thread.sleep(random.nextInt(3) * 1000 + 2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    public boolean playerMoveCheckWinner(Player player) {
+        board.printBoard();
+        int[] move;
+        do {
+            move = player.makeMove(board);
+        } while (!board.isFieldAvailable(move));
+        board.placeSymbolOn(player.getSymbol(), move);
+
+        if (isGameOver()) {
+            printWinner(player);
+            return true;
+        } if (isTie()) {
+            System.out.println("It's a TIE!");
+            return true;
+        } else {
+            return false;
         }
     }
 
     public boolean isTie() {
+        String[][] tempBoard = board.getBoard();
         for (int i=0; i < 3; i++) {
             for (int j=0; j < 3; j++) {
-                if (board[i][j].equals(" ")) {
+                if (tempBoard[i][j].equals(" ")) {
                     return false;
                 }
             }
@@ -94,92 +67,89 @@ public class TicTacToe <T extends Player, E extends Player>{
     }
 
     public void newGame() {
-        for (int i=0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                board[i][j] = " ";
-            }
-        }
+        board.cleanBoard();
         TicTacToe.main(new String[]{});
     }
 
-    public <T extends Player> void printWinner(T player) {
-        printBoard();
+    public void printWinner(Player player) {
+        board.printBoard();
         System.out.println("\n\n" + player.getName() + " WON with " + player.getSymbol() + "!");
     }
 
-    public boolean validMove(int[] move) {
-        return board[move[0]][move[1]].equals(" ");
-    }
-
     public boolean isGameOver() {
+        String[][] tempBoard = board.getBoard();
+
         // horizontal
-        if ( (board[0][0].equals(board[0][1]) && board[0][1].equals(board[0][2]) && !board[0][0].equals(" ")) ||
-                (board[1][0].equals(board[1][1]) && board[1][1].equals(board[1][2]) && !board[1][0].equals(" ")) ||
-                (board[2][0].equals(board[2][1]) && board[2][1].equals(board[2][2]) && !board[2][0].equals(" ")) ) {
+        if ( (tempBoard[0][0].equals(tempBoard[0][1]) && tempBoard[0][1].equals(tempBoard[0][2]) && !tempBoard[0][0].equals(" ")) ||
+                (tempBoard[1][0].equals(tempBoard[1][1]) && tempBoard[1][1].equals(tempBoard[1][2]) && !tempBoard[1][0].equals(" ")) ||
+                (tempBoard[2][0].equals(tempBoard[2][1]) && tempBoard[2][1].equals(tempBoard[2][2]) && !tempBoard[2][0].equals(" ")) ) {
             return true;
         }
         // vertical
-        if ( (board[0][0].equals(board[1][0]) && board[1][0].equals(board[2][0]) && !board[0][0].equals(" ")) ||
-                (board[0][1].equals(board[1][1]) && board[1][1].equals(board[2][1]) && !board[0][1].equals(" ")) ||
-                (board[0][2].equals(board[1][2]) && board[1][2].equals(board[2][2]) && !board[0][2].equals(" ")) ) {
+        if ( (tempBoard[0][0].equals(tempBoard[1][0]) && tempBoard[1][0].equals(tempBoard[2][0]) && !tempBoard[0][0].equals(" ")) ||
+                (tempBoard[0][1].equals(tempBoard[1][1]) && tempBoard[1][1].equals(tempBoard[2][1]) && !tempBoard[0][1].equals(" ")) ||
+                (tempBoard[0][2].equals(tempBoard[1][2]) && tempBoard[1][2].equals(tempBoard[2][2]) && !tempBoard[0][2].equals(" ")) ) {
             return true;
         }
         // diagonals
-        if ( (board[0][0].equals(board[1][1]) && board[1][1].equals(board[2][2]) && !board[0][0].equals(" ")) ||
-                (board[0][2].equals(board[1][1]) && board[1][1].equals(board[2][0]) && !board[0][2].equals(" "))) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    public void printBoard() {
-        System.out.println("\n\n    1   2   3 ");
-        System.out.println("              ");
-        for (int i=0; i < 3; i++) {
-            System.out.print(i+1 + "  ");
-            for (int j=0; j < 3; j++) {
-                if (j < 2) {
-                    System.out.print(" " + board[i][j] + " |");
-                } else {
-                    System.out.print(" " + board[i][j] + " ");
-                }
-            }
-            if (i < 2) {
-                System.out.println("\n   ---+---+---");
-            }
-        }
+        return (tempBoard[0][0].equals(tempBoard[1][1]) && tempBoard[1][1].equals(tempBoard[2][2]) && !tempBoard[0][0].equals(" ")) ||
+                (tempBoard[0][2].equals(tempBoard[1][1]) && tempBoard[1][1].equals(tempBoard[2][0]) && !tempBoard[0][2].equals(" "));
     }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        int gameMode;
+        Pattern pattern = Pattern.compile("[1-3]");
+        String gameMode;
 
         System.out.println("----GAME MENU----");
         System.out.println("Choose game mode: \n1) Player vs Player \n2) Player vs Computer \n3) Computer vs Computer");
         System.out.print("GAME MODE: ");
-        gameMode = Integer.parseInt(scanner.nextLine());
+        gameMode = scanner.nextLine();
+        Matcher matcher = pattern.matcher(gameMode);
 
-        Player player1 = null;
-        Player player2 = null;
+        while (!matcher.find()) {
+            System.out.print("\nChoose valid number: ");
+            gameMode = scanner.nextLine();
+            matcher = pattern.matcher(gameMode);
+        }
+        gameMode = gameMode.substring(matcher.start(), matcher.end());
 
-        if (gameMode == 1) {
+        String computerLevel = "1";
+        if (gameMode.equals("2") || gameMode.equals("3")) {
+            pattern = Pattern.compile("[1-2]");
+            System.out.println("\nChoose computer level: \n1)Beginner \n2)Expert");
+            computerLevel = scanner.nextLine();
+            matcher = pattern.matcher(computerLevel);
+            while (!matcher.find()) {
+                System.out.print("\nChoose valid number: ");
+                gameMode = scanner.nextLine();
+                matcher = pattern.matcher(gameMode);
+            }
+            computerLevel = computerLevel.substring(matcher.start(), matcher.end());
+        }
+
+        Player player1;
+        Player player2;
+
+        if (gameMode.equals("1")) {
             player1 = new HumanPlayer("X", "Human1");
-            player2 = new ComputerPlayer("O", "Human2");
+            player2 = new HumanPlayer("O", "Human2");
         }
-        else if (gameMode == 2) {
+        else if (gameMode.equals("2")) {
             player1 = new HumanPlayer("X", "Human");
-            player2 = new ComputerPlayer("O", "Computer2");
+            if (computerLevel.equals("1")) {
+                player2 = new ComputerPlayer("O", "Computer2");
+            } else {
+                player2 = new ComputerExpertPlayer("O", "Computer2");
+            }
         }
-        else if (gameMode == 3) {
+        else {
             player1 = new ComputerPlayer("X", "Computer1");
             player2 = new ComputerPlayer("O", "Computer2");
         }
 
-        TicTacToe<Player, Player> ticTacToe = new TicTacToe<>(player1, player2);
+        TicTacToe ticTacToe = new TicTacToe(player1, player2);
 
         ticTacToe.play();
     }
-
 }
