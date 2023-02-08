@@ -4,6 +4,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class HumanPlayer implements Player{
     private final String symbol;
     private final String name;
@@ -19,7 +20,7 @@ public class HumanPlayer implements Player{
     }
 
     @Override
-    public int[] makeMove(Player player1, Player player2, String[][] board) {
+    public int[] makeMove(Board board) {
         Scanner scanner = new Scanner(System.in);
         Pattern pattern = Pattern.compile("[1-3][a-cA-C]");
         String userInput;

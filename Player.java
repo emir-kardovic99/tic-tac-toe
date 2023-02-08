@@ -2,6 +2,6 @@ package vjezba_xo;
 
 public interface Player {
     String getSymbol();
-    int[] makeMove(Player player1, Player player2, String[][] board);
+    int[] makeMove(Board board);
     String getName();
 }

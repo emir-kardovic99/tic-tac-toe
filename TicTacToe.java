@@ -5,37 +5,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class TicTacToe <T extends Player, E extends Player>{
-    private final T playerOne;
-    private final E playerTwo;
-    private final String[][] board = new String[3][3];
+public class TicTacToe {
+    private final Player playerOne;
+    private final Player playerTwo;
+    private final Board board;
 
-    TicTacToe(T pOne, E pTwo) {
+    TicTacToe(Player pOne, Player pTwo) {
         playerOne = pOne;
         playerTwo = pTwo;
-
-        for (int i=0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                board[i][j] = " ";
-            }
-        }
+        board = new Board();
     }
 
     public void play() {
         Scanner scanner = new Scanner(System.in);
-        int[] pOne;
-        int[] pTwo;
 
         while(true) {
-            if (playerMakeMove(playerOne)) {
+            if (playerMoveCheckWinner(playerOne)) {
                 break;
             }
 
-            if (playerMakeMove(playerTwo)) {
+            if (playerMoveCheckWinner(playerTwo)) {
                 break;
             }
         }
-
 
         System.out.println("Do you want to play one more? (y/n): ");
         if (scanner.next().equalsIgnoreCase("y")) {
@@ -43,13 +35,13 @@ public class TicTacToe <T extends Player, E extends Player>{
         }
     }
 
-    public boolean playerMakeMove(Player player) {
-        printBoard();
+    public boolean playerMoveCheckWinner(Player player) {
+        board.printBoard();
         int[] move;
         do {
-            move = player.makeMove(playerOne, playerTwo, board);
-        } while (validMove(move));
-        board[move[0]][move[1]] = player.getSymbol();
+            move = player.makeMove(board);
+        } while (!board.isFieldAvailable(move));
+        board.placeSymbolOn(player.getSymbol(), move);
 
         if (isGameOver()) {
             printWinner(player);
@@ -62,11 +54,11 @@ public class TicTacToe <T extends Player, E extends Player>{
         }
     }
 
-
     public boolean isTie() {
+        String[][] tempBoard = board.getBoard();
         for (int i=0; i < 3; i++) {
             for (int j=0; j < 3; j++) {
-                if (board[i][j].equals(" ")) {
+                if (tempBoard[i][j].equals(" ")) {
                     return false;
                 }
             }
@@ -75,57 +67,33 @@ public class TicTacToe <T extends Player, E extends Player>{
     }
 
     public void newGame() {
-        for (int i=0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                board[i][j] = " ";
-            }
-        }
+        board.cleanBoard();
         TicTacToe.main(new String[]{});
     }
 
-    public <K extends Player> void printWinner(K player) {
-        printBoard();
+    public void printWinner(Player player) {
+        board.printBoard();
         System.out.println("\n\n" + player.getName() + " WON with " + player.getSymbol() + "!");
     }
 
-    public boolean validMove(int[] move) {
-        return !board[move[0]][move[1]].equals(" ");
-    }
-
     public boolean isGameOver() {
+        String[][] tempBoard = board.getBoard();
+
         // horizontal
-        if ( (board[0][0].equals(board[0][1]) && board[0][1].equals(board[0][2]) && !board[0][0].equals(" ")) ||
-                (board[1][0].equals(board[1][1]) && board[1][1].equals(board[1][2]) && !board[1][0].equals(" ")) ||
-                (board[2][0].equals(board[2][1]) && board[2][1].equals(board[2][2]) && !board[2][0].equals(" ")) ) {
+        if ( (tempBoard[0][0].equals(tempBoard[0][1]) && tempBoard[0][1].equals(tempBoard[0][2]) && !tempBoard[0][0].equals(" ")) ||
+                (tempBoard[1][0].equals(tempBoard[1][1]) && tempBoard[1][1].equals(tempBoard[1][2]) && !tempBoard[1][0].equals(" ")) ||
+                (tempBoard[2][0].equals(tempBoard[2][1]) && tempBoard[2][1].equals(tempBoard[2][2]) && !tempBoard[2][0].equals(" ")) ) {
             return true;
         }
         // vertical
-        if ( (board[0][0].equals(board[1][0]) && board[1][0].equals(board[2][0]) && !board[0][0].equals(" ")) ||
-                (board[0][1].equals(board[1][1]) && board[1][1].equals(board[2][1]) && !board[0][1].equals(" ")) ||
-                (board[0][2].equals(board[1][2]) && board[1][2].equals(board[2][2]) && !board[0][2].equals(" ")) ) {
+        if ( (tempBoard[0][0].equals(tempBoard[1][0]) && tempBoard[1][0].equals(tempBoard[2][0]) && !tempBoard[0][0].equals(" ")) ||
+                (tempBoard[0][1].equals(tempBoard[1][1]) && tempBoard[1][1].equals(tempBoard[2][1]) && !tempBoard[0][1].equals(" ")) ||
+                (tempBoard[0][2].equals(tempBoard[1][2]) && tempBoard[1][2].equals(tempBoard[2][2]) && !tempBoard[0][2].equals(" ")) ) {
             return true;
         }
         // diagonals
-        return (board[0][0].equals(board[1][1]) && board[1][1].equals(board[2][2]) && !board[0][0].equals(" ")) ||
-                (board[0][2].equals(board[1][1]) && board[1][1].equals(board[2][0]) && !board[0][2].equals(" "));
-    }
-
-    public void printBoard() {
-        System.out.println("\n\n    A   B   C ");
-        System.out.println("              ");
-        for (int i=0; i < 3; i++) {
-            System.out.print(i+1 + "  ");
-            for (int j=0; j < 3; j++) {
-                if (j < 2) {
-                    System.out.print(" " + board[i][j] + " |");
-                } else {
-                    System.out.print(" " + board[i][j] + " ");
-                }
-            }
-            if (i < 2) {
-                System.out.println("\n   ---+---+---");
-            }
-        }
+        return (tempBoard[0][0].equals(tempBoard[1][1]) && tempBoard[1][1].equals(tempBoard[2][2]) && !tempBoard[0][0].equals(" ")) ||
+                (tempBoard[0][2].equals(tempBoard[1][1]) && tempBoard[1][1].equals(tempBoard[2][0]) && !tempBoard[0][2].equals(" "));
     }
 
     public static void main(String[] args) {
@@ -160,7 +128,6 @@ public class TicTacToe <T extends Player, E extends Player>{
             computerLevel = computerLevel.substring(matcher.start(), matcher.end());
         }
 
-
         Player player1;
         Player player2;
 
@@ -179,12 +146,10 @@ public class TicTacToe <T extends Player, E extends Player>{
         else {
             player1 = new ComputerPlayer("X", "Computer1");
             player2 = new ComputerPlayer("O", "Computer2");
-
         }
 
-        TicTacToe<Player, Player> ticTacToe = new TicTacToe<>(player1, player2);
+        TicTacToe ticTacToe = new TicTacToe(player1, player2);
 
         ticTacToe.play();
     }
-
 }

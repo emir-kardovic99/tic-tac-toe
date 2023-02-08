@@ -2,6 +2,7 @@ package vjezba_xo;
 
 import java.util.Random;
 
+
 public class ComputerPlayer implements Player{
     private final String symbol;
     private final String name;
@@ -17,7 +18,8 @@ public class ComputerPlayer implements Player{
     }
 
     @Override
-    public int[] makeMove(Player player1, Player player2, String[][] board) {
+    public int[] makeMove(Board board) {
+        String[][] tempBoard = board.getBoard();
         Random random = new Random();
         int[][] retVal = {
                 {0, 0}, {0, 1}, {0, 2},
@@ -30,7 +32,7 @@ public class ComputerPlayer implements Player{
             rand = random.nextInt(9);
             move = retVal[rand];
 
-        } while (!board[move[0]][move[1]].equals(" "));
+        } while (!tempBoard[move[0]][move[1]].equals(" "));
 
         computerThinking();
         return move;

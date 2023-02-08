@@ -1,9 +1,9 @@
 package vjezba_xo;
 
+
 public class ComputerExpertPlayer extends ComputerPlayer implements Player{
     private final String symbol;
     private final String name;
-
 
     ComputerExpertPlayer(String symbol, String name) {
         super(symbol, name);
@@ -17,8 +17,9 @@ public class ComputerExpertPlayer extends ComputerPlayer implements Player{
     }
 
     @Override
-    public int[] makeMove(Player player1, Player player2, String[][] board) {
-        int[][] heuristicBoard = evaluate(board);
+    public int[] makeMove(Board board) {
+        String[][] tempBoard = board.getBoard();
+        int[][] heuristicBoard = evaluate(tempBoard);
 
         int rowPositionMin = 0, colPositionMin = 0;
         int rowPositionMax = 0, colPositionMax = 0;
@@ -30,12 +31,12 @@ public class ComputerExpertPlayer extends ComputerPlayer implements Player{
 
         for (int row=0; row < 3; row++) {
             for (int col=0; col < 3; col++) {
-                if (board[row][col].equals(" ") && heuristicBoard[row][col] > max) {
+                if (tempBoard[row][col].equals(" ") && heuristicBoard[row][col] > max) {
                     max = heuristicBoard[row][col];
                     rowPositionMax = row;
                     colPositionMax = col;
                 }
-                if (board[row][col].equals(" ") && heuristicBoard[row][col] < min) {
+                if (tempBoard[row][col].equals(" ") && heuristicBoard[row][col] < min) {
                     min = heuristicBoard[row][col];
                     rowPositionMin = row;
                     colPositionMin = col;
